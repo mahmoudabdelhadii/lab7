@@ -1,0 +1,89 @@
+C:/Users/MAHMOUDABDELHADI/Documents/lab7/alu.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/alu.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module ALU
+
+Top level modules:
+	ALU
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/LAB6/lab6/alu_tb.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/LAB6/lab6/alu_tb.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module ALU_tb
+
+Top level modules:
+	ALU_tb
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/shifter_tb.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/shifter_tb.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module shifter_tb
+
+Top level modules:
+	shifter_tb
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/regfile_tb.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/regfile_tb.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module regfile_tb
+
+Top level modules:
+	regfile_tb
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v {1 {vlog -work work -stats=none {C:\Users\MAHMOUDABDELHADI\Documents\lab7\datapath_tb.v}
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module datapath_tb
+
+Top level modules:
+	datapath_tb
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/cpu_tb.v {1 {vlog -work work -stats=none {C:\Users\MAHMOUDABDELHADI\Documents\lab7\cpu_tb.v}
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module cpu_tb
+
+Top level modules:
+	cpu_tb
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/regfile.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/regfile.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module REGFILE
+
+Top level modules:
+	REGFILE
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/tristate_buffer.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/tristate_buffer.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module tristate_buffer
+
+Top level modules:
+	tristate_buffer
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Downloads/lab6_autograder_check.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Downloads/lab6_autograder_check.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module lab6_check
+
+Top level modules:
+	lab6_check
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/shifter.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/shifter.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module shifter
+
+Top level modules:
+	shifter
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module datapath
+-- Compiling module Muxb4
+-- Compiling module Mux4
+-- Compiling module Muxb8
+-- Compiling module Dec
+-- Compiling module Mux8
+-- Compiling module vDFFE
+-- Compiling module Mux2
+-- Compiling module Enc
+
+Top level modules:
+	datapath
+	Muxb4
+	Muxb8
+	Enc
+
+} {} {}}
