@@ -4,7 +4,7 @@ reg [15:0] read_data;
 reg clk, reset;
 wire [15:0] write_data;
 wire[8:0] mem_addr;
-wire [1:0]mem_cmd;
+wire mem_cmd;
 wire N, V, Z;
 
 reg err;
@@ -19,7 +19,7 @@ cpu(clk,read_data,mem_cmd,mem_addr,write_data,reset,N,V,Z); //controls all of RI
 	output[8:0] mem_addr;
 
 */
-cpu DUT(.mem_cmd(mem_cmd),.mem_addr(mem_addr),.clk(clk),.reset(reset),.read_data(read_data),.write_data(write_data),.N(N),.V(V),.Z(Z));
+cpu DUT(.clk(clk),.reset(reset),.read_data(read_data),.write_data(write_data),.N(N),.V(V),.Z(Z),.w(w));
 
 
 
@@ -41,14 +41,19 @@ cpu DUT(.mem_cmd(mem_cmd),.mem_addr(mem_addr),.clk(clk),.reset(reset),.read_data
 	
    $display("TEST 1");
     err = 0;
-    reset = 1; read_data = 16'b0;
+    reset = 1; in = 16'b0;
     #10;
     reset = 0; 
     #10;
 
-    read_data = 16'b1101001100000100;
+    in = 16'b1101001100000100;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
     $display("Testing MOV R3 #4");
     $display(" The register R3 contains this: %b", cpu_tb.DUT.DP.REGFILE.R3);
@@ -61,14 +66,15 @@ cpu DUT(.mem_cmd(mem_cmd),.mem_addr(mem_addr),.clk(clk),.reset(reset),.read_data
 
 // MOV R4, #7 this means, take the absolute number 7 and store it in R4
 
-    read_data = 16'b1101010000000111;
+    in = 16'b1101010000000111;
+    load = 1;
      
     #10;
-    
-    
-   
-   
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
      $display("Testing MOV R4 #7");
      $display(" The register R4 contains this: %b", cpu_tb.DUT.DP.REGFILE.R4);
@@ -82,14 +88,19 @@ cpu DUT(.mem_cmd(mem_cmd),.mem_addr(mem_addr),.clk(clk),.reset(reset),.read_data
 
 
 
-    read_data = 16'b1010001110101100;
-   #10
-    @(posedge clk); // wait for w to go high again
+    in = 16'b1010001110101100;
+    load = 1;
+    #10;
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
      $display("Testing ADD R5, R3 R4 LSL#1");
-     $display("Actual: out = %b, Z = %1b, N = %1b, V = %1b", write_data, Z, N, V);
+     $display("Actual: out = %b, Z = %1b, N = %1b, V = %1b", out, Z, N, V);
      $display("Expected:  out = %b, Z = %b, N = %b, V = %b", 16'b0000000000010010, 1'b0 ,1'b0, 1'b0 );
-     if ((write_data == 16'b0000000000010010) & (Z == 1'b0) & (N == 1'b0) & (V == 1'b0)) begin
+     if ((out == 16'b0000000000010010) & (Z == 1'b0) & (N == 1'b0) & (V == 1'b0)) begin
     $display("The output is correct");
     end else begin
       err = 1;
@@ -102,9 +113,14 @@ cpu DUT(.mem_cmd(mem_cmd),.mem_addr(mem_addr),.clk(clk),.reset(reset),.read_data
 
 
     #10;
- 	  read_data = 16'b1010101100001100 ;
+ 	  in = 16'b1010101100001100 ;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
     $display("Testing  CMP R3, R4 LSL#1");
     $display("Actual: Z = %b, N = %b, V = %b", Z, N, V);
@@ -122,15 +138,20 @@ cpu DUT(.mem_cmd(mem_cmd),.mem_addr(mem_addr),.clk(clk),.reset(reset),.read_data
 	// AND R7, R3, R4 this means R7 = R3 & R4 LSL = 0000000000000100 & 0000000000001110 = 000000000000100
 
   #10;
-	read_data = 16'b1011001111101100;
+	in = 16'b1011001111101100;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
  $display("Testing  AND R7, R3, R4 LSL#1");
-  $display("Actual: out = %b, Z = %b, N = %b, V = %b", write_data, Z, N, V);
+  $display("Actual: out = %b, Z = %b, N = %b, V = %b", out, Z, N, V);
   $display("Expected:  out = %b, Z = %b, N = %b, V = %b", 16'b000000000000100, 1'b0 ,1'b0, 1'b0 );
   
-  if ((write_data == 16'b000000000000100) & (Z == 0) & (N == 0) & (V ==0)) begin
+  if ((out == 16'b000000000000100) & (Z == 0) & (N == 0) & (V ==0)) begin
     $display("The output is correct");
     end else begin
       err = 1;
@@ -143,15 +164,20 @@ cpu DUT(.mem_cmd(mem_cmd),.mem_addr(mem_addr),.clk(clk),.reset(reset),.read_data
 	// MVN R6, R4 , this means ~R4 = 1111111111111000
 
 #10;
-read_data = 16'b1011100011000100;
+in = 16'b1011100011000100;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
      $display("Testing  MVN R6, R4 ");
-     $display("Actual: out = %b, Z = %b, N = %b, V = %b", write_data, Z, N, V);
+     $display("Actual: out = %b, Z = %b, N = %b, V = %b", out, Z, N, V);
   $display("Expected:  out = %b, Z = %b, N = %b, V = %b", 16'b1111111111111000, 1'b0,1'b1, 1'b0 );
   
-  if ((write_data == 16'b1111111111111000) & (Z == 0) & (N == 1) & (V ==0)) begin
+  if ((out == 16'b1111111111111000) & (Z == 0) & (N == 1) & (V ==0)) begin
     $display("The output is correct");
     end else begin
       err = 1;
@@ -167,9 +193,14 @@ read_data = 16'b1011100011000100;
 // MOV R3 #3
 $display("TEST 2");
 
-read_data = 16'b1101001100000011;
+in = 16'b1101001100000011;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
     $display("Testing  MOV R3, #3 ");
     if (cpu_tb.DUT.DP.REGFILE.R3 !== 16'h3) begin
@@ -181,9 +212,15 @@ read_data = 16'b1101001100000011;
 
 //MOV R4 #3
 
-    read_data = 16'b1101010000000011;
+    in = 16'b1101010000000011;
+    load = 1;
+     
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
    
     #10;
      $display("Testing  MOV R4, #3 ");
@@ -198,15 +235,20 @@ read_data = 16'b1101001100000011;
 //ADD R5, R3, R4
 
 
-    read_data = 16'b1010001110100100;
+    in = 16'b1010001110100100;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
    
     #10;
      $display("Testing  ADD R5, R3, R4 ");
-    $display("Actual: out = %b, Z = %b, N = %b, V = %b", write_data, Z, N, V);
+    $display("Actual: out = %b, Z = %b, N = %b, V = %b", out, Z, N, V);
   $display("Expected:  out = %b, Z = %b, N = %b, V = %b", 16'h6, 1'b0 ,1'b0, 1'b0 );
-    if ((write_data == 16'h6) & (Z == 0) & (N == 0) & (V ==0)) begin
+    if ((out == 16'h6) & (Z == 0) & (N == 0) & (V ==0)) begin
     $display("The output is correct");
     end else begin
       err = 1;
@@ -221,9 +263,14 @@ read_data = 16'b1101001100000011;
 // CMP R3, R4
 
 
-read_data = 16'b1010101100000100;
+in = 16'b1010101100000100;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
     $display("Testing  CMP R3, R4 ");
     $display("Actual:  Z = %b, N = %b, V = %b", Z, N, V);
@@ -244,14 +291,19 @@ if ((Z == 1) & (N == 0) & (V ==0)) begin
 // AND R0, R3, R4 
 
 
-read_data = 16'b1011001100000100;
+in = 16'b1011001100000100;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
      $display("Testing  AND R0, R3, R4 ");
-     $display("Actual: out = %b, Z = %b, N = %b, V = %b", write_data, Z, N, V);
+     $display("Actual: out = %b, Z = %b, N = %b, V = %b", out, Z, N, V);
   $display("Expected:  out = %b, Z = %b, N = %b, V = %b", 16'h3, 1'b0 ,1'b0, 1'b0 );
-if ((write_data == 16'h3) & (Z == 0) & (N == 0) & (V ==0)) begin
+if ((out == 16'h3) & (Z == 0) & (N == 0) & (V ==0)) begin
     $display("The output is correct");
     end else begin
       err = 1;
@@ -265,14 +317,19 @@ if ((write_data == 16'h3) & (Z == 0) & (N == 0) & (V ==0)) begin
 
 
 
-read_data = 16'b1011100000100011;
+in = 16'b1011100000100011;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
      $display("Testing  MVN R1, R3 ");
-      $display("Actual: out = %b, Z = %b, N = %b, V = %b", write_data, Z, N, V);
+      $display("Actual: out = %b, Z = %b, N = %b, V = %b", out, Z, N, V);
   $display("Expected:  out = %b, Z = %b, N = %b, V = %b", 16'b1111111111111100, 1'b0 ,1'b1, 1'b0 );
-if ((write_data == 16'b1111111111111100) & (Z == 0) & (N == 1) & (V ==0)) begin
+if ((out == 16'b1111111111111100) & (Z == 0) & (N == 1) & (V ==0)) begin
     $display("The output is correct");
     end else begin
       err = 1;
@@ -289,9 +346,14 @@ if ((write_data == 16'b1111111111111100) & (Z == 0) & (N == 1) & (V ==0)) begin
 // MOV R1 #170
 $display("TEST 3");
 
-read_data = 16'b1101000111111111;
+in = 16'b1101000111111111;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
     $display("Testing  MOV R1, #170 ");
     if (cpu_tb.DUT.DP.REGFILE.R1 !== 16'b1111111111111111) begin
@@ -303,9 +365,15 @@ read_data = 16'b1101000111111111;
 
 //MOV R2, R1 LSL#1
 
-    read_data = 16'b1100000001000001;
+    in = 16'b1100000001000001;
+    load = 1;
+     
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
    
     #10;
      $display("Testing  MOV R2, R1  ");
@@ -320,15 +388,20 @@ read_data = 16'b1101000111111111;
 //ADD R3, R2, R1
 
 
-    read_data = 16'b1010000101100010;
+    in = 16'b1010000101100010;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
    
     #10;
      $display("Testing  ADD R3, R2, R1 ");
-    $display("Actual: out = %b, Z = %b, N = %b, V = %b", write_data, Z, N, V);
+    $display("Actual: out = %b, Z = %b, N = %b, V = %b", out, Z, N, V);
   $display("Expected:  out = %b, Z = %b, N = %b, V = %b", 16'b1111111111111110, 1'b0 ,1'b1, 1'b0 );
-    if ((write_data == 16'b1111111111111110) & (Z == 0) & (N == 1) & (V ==0)) begin
+    if ((out == 16'b1111111111111110) & (Z == 0) & (N == 1) & (V ==0)) begin
     $display("The output is correct");
     end else begin
       err = 1;
@@ -343,9 +416,14 @@ read_data = 16'b1101000111111111;
 // CMP R1, R2
 
 
-read_data = 16'b1010100100000010;
-   #10;
-    @(posedge clk); // wait for w to go high again
+in = 16'b1010100100000010;
+    load = 1;
+    #10;
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
     $display("Testing  CMP R1, R2 ");
     $display("Actual:  Z = %b, N = %b, V = %b", Z, N, V);
@@ -366,14 +444,19 @@ if ((Z == 1) & (N == 0) & (V ==0)) begin
 // AND R4, R1, R2 
 
 
-read_data = 16'b1011000110000010;
+in = 16'b1011000110000010;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
      $display("Testing  AND R4, R1, R2 ");
-     $display("Actual: out = %b, Z = %b, N = %b, V = %b", write_data, Z, N, V);
+     $display("Actual: out = %b, Z = %b, N = %b, V = %b", out, Z, N, V);
   $display("Expected:  out = %b, Z = %b, N = %b, V = %b", 16'b1111111111111111, 1'b0 ,1'b1, 1'b0 );
-if ((write_data == 16'b1111111111111111) & (Z == 0) & (N == 1) & (V ==0)) begin
+if ((out == 16'b1111111111111111) & (Z == 0) & (N == 1) & (V ==0)) begin
     $display("The output is correct");
     end else begin
       err = 1;
@@ -387,14 +470,19 @@ if ((write_data == 16'b1111111111111111) & (Z == 0) & (N == 1) & (V ==0)) begin
 
 
 
-read_data = 16'b1011100010100001;
+in = 16'b1011100010100001;
+    load = 1;
     #10;
-    @(posedge clk); // wait for w to go high again
+    load = 0;
+    s = 1;
+    #10
+    s = 0;
+    @(posedge w); // wait for w to go high again
     #10;
      $display("Testing  MVN R1, R3 ");
-      $display("Actual: out = %b, Z = %b, N = %b, V = %b", write_data, Z, N, V);
+      $display("Actual: out = %b, Z = %b, N = %b, V = %b", out, Z, N, V);
   $display("Expected:  out = %b, Z = %b, N = %b, V = %b", 16'b0, 1'b1 ,1'b0, 1'b0 );
-if ((write_data == 16'b0) & (Z == 1) & (N == 0) & (V ==0)) begin
+if ((out == 16'b0) & (Z == 1) & (N == 0) & (V ==0)) begin
     $display("The output is correct");
     end else begin
       err = 1;

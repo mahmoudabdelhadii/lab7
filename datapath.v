@@ -6,9 +6,10 @@ module datapath (clk,readnum,vsel,loada,loadb,shift,asel,bsel,ALUop,loadc,loads,
 	input [2:0] writenum, readnum;
 	input [1:0] ALUop, shift;
 	input	[3:0] vsel;
-	input [7:0] PC;
+	
 	output [n-1:0] datapath_out;
 	output [2:0] status_out;
+	input [7:0]PC;
 	
 	wire [n-1:0] data_in, data_out, data_out_A, data_out_B, sout, Ain, Bin, out;
 	wire [2:0] status;

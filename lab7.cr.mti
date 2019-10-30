@@ -26,14 +26,25 @@ Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  
 Top level modules:
 	regfile_tb
 
-} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v {1 {vlog -work work -stats=none {C:\Users\MAHMOUDABDELHADI\Documents\lab7\datapath_tb.v}
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v {0 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v
 Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
 -- Compiling module datapath_tb
+** Error: C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v(29): (vlog-2110) Illegal reference to net "in".
+** Error: C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v(34): (vlog-2110) Illegal reference to net "in".
+** Error: C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v(45): (vlog-2110) Illegal reference to net "in".
+** Error: C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v(56): (vlog-2110) Illegal reference to net "in".
+** Error: C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v(102): (vlog-2110) Illegal reference to net "in".
+** Error: C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v(123): (vlog-2110) Illegal reference to net "in".
+** Error: C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath_tb.v(137): (vlog-2110) Illegal reference to net "in".
+
+} {4.0 11.0} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/Program_counter_tb.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/Program_counter_tb.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module Program_counter_tb
 
 Top level modules:
-	datapath_tb
+	Program_counter_tb
 
-} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/cpu_tb.v {1 {vlog -work work -stats=none {C:\Users\MAHMOUDABDELHADI\Documents\lab7\cpu_tb.v}
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/cpu_tb.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/cpu_tb.v
 Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
 -- Compiling module cpu_tb
 
@@ -68,6 +79,14 @@ Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  
 Top level modules:
 	shifter
 
+} {} {}} {C:/Users/MAHMOUDABDELHADI/Documents/lab7/Read-Write Memory.v} {1 {vlog -work work -stats=none {C:/Users/MAHMOUDABDELHADI/Documents/lab7/Read-Write Memory.v}
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module MEM
+-- Compiling module RAM
+
+Top level modules:
+	MEM
+
 } {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/datapath.v
 Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
 -- Compiling module datapath
@@ -85,5 +104,12 @@ Top level modules:
 	Muxb4
 	Muxb8
 	Enc
+
+} {} {}} C:/Users/MAHMOUDABDELHADI/Documents/lab7/Program_counter.v {1 {vlog -work work -stats=none C:/Users/MAHMOUDABDELHADI/Documents/lab7/Program_counter.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module PC
+
+Top level modules:
+	PC
 
 } {} {}}

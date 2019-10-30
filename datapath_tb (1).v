@@ -2,7 +2,7 @@ module datapath_tb;
 
 
 	
-reg [15:0] mdata;
+reg [15:0] in;
 reg clk, reset, s, load;
 wire [15:0] out;
 wire N, V, Z;
@@ -66,7 +66,8 @@ in = 16'b1010001110101100;
 
 
 $display("Testing the mux4 after we did an ADD operation with 4 + 7 shiffted to the left");
-$display("The mux should have as inputs mdata, sximm8 (in this case the immediate 8 bit input that is sign extended), pc and C (18 =(14+4)). Vsel should be one-hot 0 and the output 18.");
+$display("The mux should have as inputs mdata, sximm8 (in this case the immediate 8 bit input that is sign extended), pc and C (18 =(14+4)). 
+Vsel should be one-hot 0 and the output 18.");
  $display("%b", datapath_tb.DUT.DP.b9wbmux4in.b );
 
 if(datapath_tb.DUT.DP.b9wbmux4in.b  == 18) begin
