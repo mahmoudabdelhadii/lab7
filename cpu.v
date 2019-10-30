@@ -55,8 +55,10 @@ module cpu(clk,read_data,mem_cmd,mem_addr,write_data,reset,N,V,Z); //controls al
 	reg loada, loadb, loadc, loads, write, asel, bsel;
 	wire [1:0] op;
 	wire [1:0] ALUop, shift;
-	wire [2:0] state, readwrite;
-	reg [2:0] n_state, nsel;
+	wire [2:0] readwrite;
+	reg [2:0]  nsel;
+	wire [3:0] state;
+	reg[3:0] n_state;
 	reg [3:0] vsel;
 	wire [2:0] opcode;
 	wire [15:0] inreg, sximm8, sximm5;
@@ -72,7 +74,7 @@ module cpu(clk,read_data,mem_cmd,mem_addr,write_data,reset,N,V,Z); //controls al
 	datapath #(16) DP(.clk(clk), .readnum(readwrite), .vsel(vsel), .loada(loada),
 										.loadb(loadb), .shift(shift), .asel(asel), .bsel(bsel),
 										.ALUop(ALUop), .loadc(loadc), .loads(loads), .writenum(readwrite),
-										.write(write), .mdata(mdata), .sximm8(sximm8), .PC(PC),
+										.write(write), .mdata(read_data), .sximm8(sximm8), .PC(PC),
 										.sximm5(sximm5), .status_out({V,N,Z}), .datapath_out(write_data)); // assigns inputs to run datapath based on cpu FSM and instruction decoding
 									
 	PC U2(/*inputs*/.clk(clk), /*FSM*/.reset_pc(reset_pc),/*FSM*/.load_pc(load_pc),/*FSM*/.load_addr(load_addr),/*FSM*/.addr_sel(addr_sel),.datapath_out(write_data),/*outputs*/.mem_addr(mem_addr));
@@ -82,62 +84,75 @@ module cpu(clk,read_data,mem_cmd,mem_addr,write_data,reset,N,V,Z); //controls al
 	always @(posedge clk) begin //goes over states of various opcode/op instructions, assigns relevant datapath inputs, else staying in the same state and assigning all zeros for the default line
 		casex({reset, opcode, op, state})
 			
+			//RESET
 			{1'b1, 3'bxxx, 2'bxx, 4'bxxxx}: n_state <= `reset; //reset state
 			
+			//RESET TO IF1
 			{1'b0, 3'bxxx, 2'bxx, `reset}: {n_state,reset_pc,load_pc,mem_cmd,addr_sel,load_ir} <= {`IF1,1'b1,1'b1,`MNONE,1'b0,1'b0}; //s is zero and reset state
-			//{1'b0, `MOVopc, `wrImmop, `reset}:  {n_state,reset_pc,load_pc} <= {`IF1,1'b1,1'b1};
-			//{1'b0, `MOVopc, `wrShft, `reset}:  {n_state,reset_pc,load_pc} <= {`IF1,1'b1,1'b1};
-			//{1'b0, `ALUopc, 2'bxx, `reset}:  {n_state,reset_pc,load_pc} <= {`IF1,1'b1,1'b1};
 			
-			{1'b1, 3'bxxx, 2'bxx, `IF1} :  {n_state,addr_sel,mem_cmd,reset_pc,load_pc,addr_sel} <= {`IF2,1'b1,`MREAD,1'b0,1'b0,1'b1}; //s is zero and reset state
+			//IF1 to IF2
+			{1'b0, 3'bxxx, 2'bxx, `IF1} :  {n_state,addr_sel,mem_cmd,reset_pc,load_pc,addr_sel} <= {`IF2,1'b1,`MREAD,1'b0,1'b0,1'b1}; //s is zero and reset state
 			
-			{1'b1, 3'bxxx, 2'bxx, `IF2} : {n_state,addr_sel,mem_cmd,load_ir}  <= {`updatePC,1'b1,`MREAD,1'b1};
+			//IF2 TO UPDATEPC
+			{1'b0, 3'bxxx, 2'bxx, `IF2} : {n_state,addr_sel,mem_cmd,load_ir}  <= {`updatePC,1'b1,`MREAD,1'b1};
 			
+			//UPDATEPC TO WRITEIMM, GETA(movopc), GETA(aluopc)
 			{1'b0, `MOVopc, `wrImmop, `updatePC}: {n_state, load_pc} <= {`WriteImm,1'b1};
 			{1'b0, `MOVopc, `wrShft, `updatePC}:{n_state, load_pc} <= {`GetA,1'b1}; 
 			{1'b0, `ALUopc, 2'bxx, `updatePC}: {n_state, load_pc} <= {`GetA,1'b1};
-			//new states
+			
+			//UPDATE PC to HALT, GETA(ldropc), GETA(stropc)
 			{1'b0, `HALTopc,2'b00, `updatePC}: {n_state, load_pc,addr_sel,mem_cmd,load_ir} <= {`HALT,1'b1,1'b0,`MNONE,1'b0};
 			{1'b0, `LDRopc,2'b00, `updatePC}: {n_state, load_pc,addr_sel,mem_cmd,load_ir} <= {`GetA,1'b1,1'b0,`MNONE,1'b0};
 			{1'b0, `STRopc,2'b00, `updatePC}: {n_state, load_pc,addr_sel,mem_cmd,load_ir} <= {`GetA,1'b1,1'b0,`MNONE,1'b0};
 			
+			//GET A to WRITEIMM(ldropc), WRITEIMM(stropc)
 			{1'b0, `LDRopc, 2'bxx, `GetA}: {n_state, nsel, loada} <= {`WriteImm, `Rn, 1'b1};
 			{1'b0, `STRopc, 2'bxx, `GetA}: {n_state, nsel, loada} <= {`WriteImm, `Rn, 1'b1};
-			{1'b0, `HALTopc, 2'bxx, `HALT}: n_state <= `extraClk;
 
+			//HALT TO EXTRACLK AND EXTRACLK TO HALT
+			{1'b0, `HALTopc, 2'bxx, `HALT}: n_state <= `extraClk;
 			{1'b0, `HALTopc, 2'bxx, `extraClk}: {n_state, write} <= `HALT;
 
+			//WRITEIMM to alushift(ldr), alushift(str)
 			{1'b0, `LDRopc, 2'bxx, `WriteImm}:{n_state, nsel, vsel, write} <= {`alushiftloadcs, `Rn, `mdata, 1'b1};
 			{1'b0, `STRopc, 2'bxx, `WriteImm}: {n_state, nsel, vsel, write} <= {`alushiftloadcs, `Rn, `mdata, 1'b1};
 
+			//alushift to GETMEM(ldr), GETMEM(str)
 			{1'b0, `LDRopc, 2'bxx, `alushiftloadcs}: {n_state, asel, bsel, loadc, loads, loadb} <= {`GetMem, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0};//state which performs calculations on numbers
 			{1'b0, `STRopc, 2'bxx, `alushiftloadcs}: {n_state, asel, bsel, loadc, loads, loadb} <= {`GetMem, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0};//state which performs calculations on numbers
 
+			//GETMEM to LDRREADMEM, GETB
 			{1'b0, `LDRopc, 2'bxx, `GetMem}: {n_state,addr_sel,load_pc,mem_cmd} <= {`LDRReadMem};
 			{1'b0, `STRopc, 2'bxx, `GetMem}: n_state <= `GetB;
 
+			//LDRREADMEM TO WRITEREG, GETB TO alushift
 			{1'b0, `LDRopc, 2'bxx, `LDRReadMem}: n_state <= `WriteReg;
 			{1'b0, `STRopc, 2'bxx, `GetB}: {n_state, nsel, loadb, loada} <= {`alushiftloadcs, `Rm, 1'b1, 1'b0};
 
+			//alushift to WRITEMEM
 			{1'b0, `STRopc, 2'bxx, `alushiftloadcs}: {n_state, asel, bsel, loadc, loads, loadb} <= {`WriteMem, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0};
 
-
+			//
 			{1'b0, `LDRopc, 2'bxx, `WriteReg}: {n_state, nsel, vsel, write, loadc, loads} <= {`extraClk, `Rd, `Vdataout, 1'b1, 1'b0, 1'b0};
 			{1'b0, `STRopc, 2'bxx, `WriteMem}: n_state <= `extraClk;
 
 
-			{1'b0, 3'bxxx, 2'bxx, `WriteImm}: {n_state, nsel, vsel, write} <= {`extraClk, `Rn, `Vsximm8, 1'b1}; //state to write number from vsel mux to register Rn
+			{1'b0, `MOVopc, `wrImmop, `WriteImm}: {n_state, nsel, vsel, write} <= {`extraClk, `Rn, `Vsximm8, 1'b1}; //state to write number from vsel mux to register Rn
 			//{1'b0, 3'bxxx, 2'bxx, `WriteImm}: {n_state}<={`extraClk};
 
-			{1'b0, 3'bxxx, 2'bxx, `GetA}: {n_state, nsel, loada} <= {`GetB, `Rn, 1'b1}; // state to get first source operand
+			{1'b0, `MOVopc, `wrShft, `GetA}: {n_state, nsel, loada} <= {`GetB, `Rn, 1'b1}; // state to get first source operand
+			{1'b0, `ALUopc, 2'bxx, `GetA}: {n_state, nsel, loada} <= {`GetB, `Rn, 1'b1};
 			
-			{1'b0, 3'bxxx, 2'bxx, `GetB}: {n_state, nsel, loadb, loada} <= {`alushiftloadcs, `Rm, 1'b1, 1'b0}; // state to get second source operand
+			{1'b0, `MOVopc, `wrShft, `GetB}: {n_state, nsel, loadb, loada} <= {`alushiftloadcs, `Rm, 1'b1, 1'b0}; // state to get second source operand
+			{1'b0, `ALUopc, 2'bxx, `GetB}: {n_state, nsel, loadb, loada} <= {`alushiftloadcs, `Rm, 1'b1, 1'b0}; // state to get second source operand
 			
 			{1'b0, `ALUopc, 2'bxx, `alushiftloadcs}: {n_state, asel, bsel, loadc, loads, loadb} <= {`WriteReg, 1'b0, 1'b0, 1'b1, 1'b1, 1'b0};//state which performs calculations on numbers
 			{1'b0, `MOVopc, 2'bxx, `alushiftloadcs}: {n_state, asel, bsel, loadc, loads, loadb} <= {`WriteReg, 1'b1, 1'b0, 1'b1, 1'b1, 1'b0};												
 			
 			{1'b0, 3'bxxx, 2'bxx, `WriteReg}: {n_state, nsel, vsel, write, loadc, loads} <= {`extraClk, `Rd, `Vdataout, 1'b1, 1'b0, 1'b0};// state to write numbers to Rd
-			
+			{1'b0, 3'bxxx, 2'bxx, `WriteReg}: {n_state, nsel, vsel, write, loadc, loads} <= {`extraClk, `Rd, `Vdataout, 1'b1, 1'b0, 1'b0};// state to write numbers to Rd
+
 			{1'b0, 3'bxxx, 2'bxx, `extraClk}: {n_state, write} <= {`IF1, 1'b0};//extra state to allow program to correctly execute before error signal is checked
 			
 			default: {n_state, nsel, loada, loadb, loadc, loads, vsel, write, asel, bsel} <= {n_state, 3'b000, 1'b0, 1'b0, 1'b0, 1'b0, 4'b0, 1'b0, 1'b0, 1'b0};//maintain state if issue to indicate issue, all signals 0 to have nothing doing anything
